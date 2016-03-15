@@ -1,26 +1,46 @@
 defmodule UrlShortener.PageControllerTest do
   use UrlShortener.ConnCase
 
-  test "GET /", %{conn: conn} do
+  test "GET / - 404", %{conn: conn} do
     conn = get conn, "/"
-    assert html_response(conn, 200) =~ "Welcome to Phoenix!"
+    assert json_response(conn, 404) == %{"code" => -1000, "message" => "resource not found", "data" => [404]}
   end
 
   test "POST /api/shorten_url - new url", %{conn: conn} do
-    conn = post conn, "/api/shorten_url", %{ :url => "https://www.example.com"}
-    assert json_response(conn, 201) == ~s({code:1, message:"created", data:["https://www.short.net/1"]})
+    conn = post conn, "/api/shorten_url.json", %{ :url => "https://www.example.com"}
+    assert json_response(conn, 201) == %{"code" => 1, "message" => "created", "data" => ["https://www.short.net/1"]}
   end
 
   test "POST /api/shorten_url - new url2", %{conn: conn} do
-    conn = post conn, "/api/shorten_url", %{ :url => "https://www.example.com"}
-    conn = post conn, "/api/shorten_url", %{ :url => "https://www.example2.com"}
-    assert json_response(conn, 201) == ~s({code:1, message:"created", data:["https://www.short.net/2"]})
+    conn = post conn, "/api/shorten_url.json", %{ :url => "https://www.example.com"}
+    conn = post conn, "/api/shorten_url.json", %{ :url => "https://www.example2.com"}
+    assert json_response(conn, 201) == %{"code" => 1, "message" => "created", "data" => ["https://www.short.net/2"]}
   end
 
   test "POST /api/shorten_url - same url", %{conn: conn} do
-    conn = post conn, "/api/shorten_url", %{ :url => "https://www.example2.com"}
-    conn = post conn, "/api/shorten_url", %{ :url => "https://www.example2.com"}
-    assert json_response(conn, 200) == ~s({code:0, message:"existed", data:["https://www.short.net/1"]})
+    conn = post conn, "/api/shorten_url.json", %{ :url => "https://www.example2.com"}
+    conn = post conn, "/api/shorten_url.json", %{ :url => "https://www.example2.com"}
+    assert json_response(conn, 200) == %{"code" => 0, "message" => "existed", "data" => ["https://www.short.net/1"]}
+  end
+
+  test "POST /api/shorten_url - 404", %{conn: conn} do
+    conn = post conn, "/api/shorten_url.json2", %{ :url => "https://www.example2.com"}
+    assert json_response(conn, 404) == %{"code" => -1000, "message" => "resource not found", "data" => [404]}
+  end
+
+  test "POST /api/shorten_url - 400", %{conn: conn} do
+    conn = post conn, "/api/shorten_url.json", %{ :url2 => "https://www.example2.com"}
+    assert json_response(conn, 400) == %{"code" => -1002, "message" => "request criteria not met", "data" => [400]}
+  end
+
+  test "POST /api/shorten_url - 400 no param", %{conn: conn} do
+    conn = post conn, "/api/shorten_url.json", %{}
+    assert json_response(conn, 400) == %{"code" => -1002, "message" => "request criteria not met", "data" => [400]}
+  end
+
+  test "POST /api/shorten_url - 400 empty body", %{conn: conn} do
+    conn = post conn, "/api/shorten_url.json"
+    assert json_response(conn, 400) == %{"code" => -1002, "message" => "request criteria not met", "data" => [400]}
   end
 
 end

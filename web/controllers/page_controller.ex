@@ -1,8 +1,15 @@
 defmodule UrlShortener.PageController do
   use UrlShortener.Web, :controller
 
-  def index(conn, _params) do
-    render conn, "index.html"
+  def call(conn, opts) do
+    try do
+      super(conn, opts)
+    rescue
+      e in UndefinedFunctionError -> conn |> put_status(404) |> json %{"code" => -1000, "message" => "resource not found", "data" => [404]}
+      # e in Phoenix.MissingParamError -> conn |> put_status(400) |> json %{"code" => -1001, "message" => "request criteria not met", "data" => [400]}
+      e in Phoenix.ActionClauseError -> conn |> put_status(400) |> json %{"code" => -1002, "message" => "request criteria not met", "data" => [400]}
+      e in _ -> conn |> put_status(500) |> json %{"code" => -2000, "message" => "error", "data" => [500, e]}
+    end
   end
 
   def shorten_url conn, %{"url" => url} do
@@ -20,13 +27,13 @@ defmodule UrlShortener.PageController do
       new_url = Repo.update! new_url
 
       conn = put_status conn, 201
-      json conn, ~s({code:1, message:"created", data:["#{base_url <> short_url}"]})
+      json conn, %{"code" => 1, "message" => "created", "data" => ["#{base_url <> short_url}"]}
     else
       ok ->
       existing_url = Repo.get_by! UrlShortener.Url, real_url: sanitized_url
       short_url = UrlShortener.Util.gen_url existing_url.id
       conn = put_status conn, 200
-      json conn, ~s({code:0, message:"existed", data:["#{base_url <> short_url}"]})
+      json conn, %{"code" => 0, "message" => "existed", "data" => ["#{base_url <> short_url}"]}
 
     end
     #
