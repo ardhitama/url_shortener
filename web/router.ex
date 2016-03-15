@@ -6,7 +6,7 @@ defmodule UrlShortener.Router do
       super(conn, opts)
     rescue
       e in Phoenix.Router.NoRouteError -> conn |> put_status(404) |> json %{"code" => -1000, "message" => "resource not found", "data" => [404]}
-      e in _ -> conn |> put_status(500) |> json %{"code" => -2000, "message" => "error", "data" => [500, e]}
+      e in _ -> conn |> put_status(500) |> json %{"code" => -2000, "message" => "error", "data" => [500]}
     end
   end
 
@@ -22,15 +22,16 @@ defmodule UrlShortener.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", UrlShortener do
-    pipe_through :browser # Use the default browser stack
-
-    get "/", PageController, :index
-  end
+  # scope "/", UrlShortener do
+  #   pipe_through :browser # Use the default browser stack
+  #
+  #   get "/", PageController, :index
+  # end
 
   # Other scopes may use custom stacks.
-  scope "/api", UrlShortener do
+  scope "/", UrlShortener do
     pipe_through :api
-    post "/shorten_url.json", PageController, :shorten_url
+    post "/", PageController, :shorten_url
+    get "/:short_url", PageController, :get_real_url
   end
 end
