@@ -43,6 +43,12 @@ defmodule UrlShortener.PageControllerTest do
     assert json_response(conn, 400) == %{"code" => -1002, "message" => "request criteria not met", "data" => [400]}
   end
 
+  test "GET /0 - 404 expand url not found", %{conn: conn} do
+    conn = post conn, "/", %{ :url => "https://www.example.com"}
+    conn = get conn, "/0"
+    assert json_response(conn, 404) == %{"code" => -1000, "message" => "resource not found", "data" => [404]}
+  end
+
   test "GET /1 - expand url", %{conn: conn} do
     conn = post conn, "/", %{ :url => "https://www.example.com"}
     conn = get conn, "/1"

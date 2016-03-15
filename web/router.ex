@@ -6,6 +6,7 @@ defmodule UrlShortener.Router do
       super(conn, opts)
     rescue
       e in Phoenix.Router.NoRouteError -> conn |> put_status(404) |> json %{"code" => -1000, "message" => "resource not found", "data" => [404]}
+      e in Sqlite.Ecto.Error -> conn |> put_status(500) |> json %{"code" => -2001, "message" => "db error", "data" => [500]}
       e in _ -> conn |> put_status(500) |> json %{"code" => -2000, "message" => "error", "data" => [500]}
     end
   end
