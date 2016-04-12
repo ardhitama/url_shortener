@@ -1,0 +1,18 @@
+<h2>Show url</h2>
+
+<ul>
+
+  <li>
+    <strong>Real url:</strong>
+    <%= @url.real_url %>
+  </li>
+
+  <li>
+    <strong>Short url:</strong>
+    <%= @url.short_url %>
+  </li>
+
+</ul>
+
+<%= link "Edit", to: url_path(@conn, :edit, @url) %>
+<%= link "Back", to: url_path(@conn, :index) %>
