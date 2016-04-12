@@ -5,10 +5,11 @@ defmodule UrlShortener.PageController do
     try do
       super(conn, opts)
     rescue
-      e in UndefinedFunctionError -> conn |> put_status(404) |> json %{"code" => -1000, "message" => "resource not found", "data" => [404]}
-      e in Phoenix.MissingParamError -> conn |> put_status(400) |> json %{"code" => -1001, "message" => "request criteria not met", "data" => [400]}
-      e in Phoenix.ActionClauseError -> conn |> put_status(400) |> json %{"code" => -1002, "message" => "request criteria not met", "data" => [400]}
-      e in _ -> conn |> put_status(500) |> json %{"code" => -2000, "message" => "error", "data" => [500]}
+      _ in UndefinedFunctionError -> conn |> put_status(404) |> json %{"code" => -1000, "message" => "resource not found", "data" => [404]}
+      _ in Phoenix.MissingParamError -> conn |> put_status(400) |> json %{"code" => -1001, "message" => "request criteria not met", "data" => [400]}
+      _ in Phoenix.ActionClauseError -> conn |> put_status(400) |> json %{"code" => -1002, "message" => "request criteria not met", "data" => [400]}
+      _ in Ecto.NoResultsError -> conn |> put_status(404) |> json %{"code" => -1001, "message" => "resource not found", "data" => [404]}
+      _ in _ -> conn |> put_status(500) |> json %{"code" => -2000, "message" => "error", "data" => [500]}
     end
   end
 
